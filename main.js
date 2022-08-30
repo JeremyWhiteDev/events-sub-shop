@@ -16,7 +16,7 @@ document.getElementById("app").innerHTML = `
         <input id="italianHerb" name="bread" type="radio" value="italianHerb" />
         </div>
         <div class="toasted">
-          <p>Select Whther the bread should be toasted</p>
+          <p>Select Whether the bread should be toasted</p>
           <ul>
             <li>
               <input id="Toasted" name="toasted" type="checkbox" value="true" />
@@ -34,8 +34,17 @@ document.getElementById("app").innerHTML = `
         <label for="chicken">Chicken</label>
         <input id="chicken" name="protein" type="radio" value="chicken" />
         </div>
+      <div class="cheese">
+        <p>Pick your Cheese</p>
+        <label for="Cheddar">Cheddar</label>
+        <input id="Cheddar" name="cheese" type="radio" value="Cheddar" />
+        <label for="Swiss">Swiss</label>
+        <input id="Swiss" name="cheese" type="radio" value="Swiss" />
+        <label for="Provolone">Provolone</label>
+        <input id="Provolone" name="cheese" type="radio" value="Provolone" />
+        </div>
         <div class="toppings">
-          <p>Pick your Toppings (Select all that apply)</p>
+          <p>Pick your Toppings (Select all that apply), maximum 4 per sandwich</p>
           <ul>
             <li>
               <input id="Black Olives" name="toppings" type="checkbox" value="Black Olives" />
@@ -52,6 +61,10 @@ document.getElementById("app").innerHTML = `
             <li>
               <input id="Tomatoes" name="toppings" type="checkbox" value="Tomatoes" />
               <label for="Tomatoes">Tomatoes</label>
+            </li>
+            <li>
+              <input id="Pickles" name="toppings" type="checkbox" value="Pickles" />
+              <label for="Pickles">Pickles</label>
             </li>
             <li>
               <input id="Lettuce" name="toppings" type="checkbox" value="Lettuce" />
@@ -77,11 +90,11 @@ const displayOrders = () => {
   const orders = getOrders();
   let htmlSection = "";
   for (const order of orders) {
-    htmlSection += `<p>Order: ${order.id} | Bread: ${
-      order.bread
-    } | Toppings: ${order.toppings.join(", ")} | Special Instructions:${
-      order.instructions
-    }<p>`;
+    htmlSection += `<p>Order: ${order.id} | Bread: ${order.bread} | Toasted: ${
+      order.toasted
+    } | Protein: ${order.protein} | Toppings: ${order.toppings.join(
+      ", "
+    )} | Special Instructions:${order.instructions}<p>`;
   }
   document.getElementById("orders").innerHTML = htmlSection;
 };
@@ -89,6 +102,21 @@ const displayOrders = () => {
 document.addEventListener("click", (e) => {
   if (e.target.id === "submitOrder") {
     const bread = document.querySelector("input[name=bread]:checked")?.value;
+    const protein = document.querySelector(
+      "input[name=protein]:checked"
+    )?.value;
+    const checkToast = (element) => {
+      if (element) {
+        return true;
+      } else {
+        return false;
+      }
+    };
+
+    const isToasted = checkToast(
+      document.querySelector("input[name=toasted]:checked")?.value
+    );
+    const cheese = document.querySelector("input[name=cheese]:checked")?.value;
     const toppingsElements = document.querySelectorAll(
       "input[name=toppings]:checked"
     );
@@ -96,17 +124,35 @@ document.addEventListener("click", (e) => {
     const toppings = toppingsElements.forEach((toppingElement) => {
       toppingsArray.push(toppingElement.value);
     });
-    // format them into an object and add that object to the `orders` array in `orders.js`
-    const specialInstructions = document.getElementById(
-      "specialInstructions"
-    )?.value;
-    const newObj = {
-      id: 0,
-      bread: bread,
-      toppings: toppingsArray,
-      instructions: specialInstructions,
-    };
-    addNewOrder(newObj);
+
+    if (bread && cheese && protein && toppingsArray.length < 5) {
+      // format them into an object and add that object to the `orders` array in `orders.js`
+      const specialInstructions = document.getElementById(
+        "specialInstructions"
+      )?.value;
+      const newObj = {
+        id: 0,
+        bread: bread,
+        toasted: isToasted,
+        protein: protein,
+        cheese: cheese,
+        toppings: toppingsArray,
+        instructions: specialInstructions,
+      };
+      addNewOrder(newObj);
+    } else {
+      let itemUndefined = [];
+      if (!bread) [itemUndefined.push("No Bread Selected")];
+      if (!protein) [itemUndefined.push("No Protein Selected")];
+      if (!cheese) [itemUndefined.push("No Cheese Selected")];
+      if (toppingsArray.length >= 5)
+        [itemUndefined.push("No more than three toppings")];
+      alert(
+        `Oops!! Looks like you've got an issue with your order: ${itemUndefined.join(
+          ", "
+        )}`
+      );
+    }
   }
 });
 
